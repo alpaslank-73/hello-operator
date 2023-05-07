@@ -1,0 +1,12 @@
+apiVersion: mygroup.quay.io/v1
+kind: Hello
+metadata:
+  labels:
+    app.kubernetes.io/name: hello
+    app.kubernetes.io/instance: hello-sample
+    app.kubernetes.io/part-of: hello-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: hello-operator
+  name: hello-sample
+spec:
+  namespace: zalp1

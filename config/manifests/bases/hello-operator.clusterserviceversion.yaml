@@ -1,0 +1,44 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: hello-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions: {}
+  description: Hello Operator
+  displayName: Hello
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - ansible
+  - operator
+  - hello
+  links:
+  - name: Hello Operator
+    url: https://hello-operator.domain
+  maintainers:
+  - email: alp@perception.com.tr
+    name: alp
+  maturity: alpha
+  provider:
+    name: Alpaslan Kaplan
+    url: https://perception.com.tr
+  version: 0.0.0

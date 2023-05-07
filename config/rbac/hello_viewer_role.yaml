@@ -1,0 +1,27 @@
+# permissions for end users to view hellos.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: hello-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: hello-operator
+    app.kubernetes.io/part-of: hello-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: hello-viewer-role
+rules:
+- apiGroups:
+  - mygroup.quay.io
+  resources:
+  - hellos
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - mygroup.quay.io
+  resources:
+  - hellos/status
+  verbs:
+  - get

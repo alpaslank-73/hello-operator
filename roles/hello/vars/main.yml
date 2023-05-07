@@ -1,0 +1,6 @@
+---
+# defaults file for Hello
+image: quay.io/alpaslank/hello:latest
+name: hello
+namespace: mynamespace
+replicas: 1

@@ -1,0 +1,71 @@
+---
+# tasks file for Hello
+- name: Create namespace/project
+  community.okd.k8s:
+    validate_certs: false
+    state: present
+    resource_definition:
+      apiVersion: project.openshift.io/v1
+      kind: Project
+      metadata:
+        name: "{{ namespace }}"
+
+
+- name: Create deployment
+  community.okd.k8s:
+    validate_certs: false
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: '{{ name }}'
+        namespace: '{{ namespace }}'
+      spec:
+        selector:
+          matchLabels:
+            app: '{{ name }}'
+        replicas: '{{ replicas }}'
+        template:
+          metadata:
+            labels:
+              app: '{{ name }}'
+          spec:
+            containers:
+            - name: '{{ name }}'
+              image: '{{ image }}'
+              ports:
+              - containerPort: 8080
+
+- name: Create service
+  community.okd.k8s:
+    validate_certs: false
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: '{{ name }}'
+        namespace: '{{ namespace }}'
+      spec:
+        selector:
+          app: '{{ name }}'
+        ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+
+- name: create route
+  community.okd.openshift_route:
+  #redhat.openshift.openshift_route:
+    namespace: '{{ namespace }}'
+    validate_certs: false
+    service: '{{ name }}'
+  register: rota
+
+- name: set route
+  set_fact:
+    route: "{{ rota['result']['spec']['host'] }}"
+ 
+- debug:
+    msg: Use curl http://{{ route }} to check deployment
