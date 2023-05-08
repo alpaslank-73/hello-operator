@@ -199,11 +199,56 @@ $ oc edit
 spec:
   image: quay.io/alpaslank/hello-operator-catalog:latest
 ...
+=======================================00
+operator-sdk'yi pass gecerek quay.io'daki repo'lar uzerinden direkt operator kurmak icin sirasiyla "namespace, catalogsource, operatorgroup ve subscription" yarat (silmek icin de "sub, csv & og" u sil):
 
+1) oc create namespace hello-operator
 
+2) oc apply -f catalogsource.yaml
 
+3) oc apply -f operatorgroup.yaml
 
+4) oc apply -f subscription.yaml
 
+Dosyalar:
 
+$ cat catalogsource.yaml 
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: hello-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: Hello catalog
+  icon:
+    base64data: ""
+    mediatype: ""
+  image: quay.io/alpaslank/hello-operator-catalog:latest
+  publisher: Perception
+  sourceType: grpc
+----------------------------------
+$ cat operatorgroup.yaml 
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: hello-operator
+  namespace: hello-operator
+spec:
+  targetNamespaces:
+  - hello-operator
+----------------------------------
+$ cat subscription.yaml 
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: hello-operator
+  namespace: hello-operator
+spec:
+  channel: alpha
+  name: hello-operator
+  source: hello-operator-catalog
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic
+  #startingCSV: hello-operator.v0.0.2
 
 

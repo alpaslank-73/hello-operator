@@ -1,0 +1,14 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: hello-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: Hello catalog
+  icon:
+    base64data: ""
+    mediatype: ""
+  image: quay.io/alpaslank/hello-operator-catalog:latest
+  publisher: Perception
+  sourceType: grpc
+
