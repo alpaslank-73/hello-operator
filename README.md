@@ -251,4 +251,44 @@ spec:
   installPlanApproval: Automatic
   #startingCSV: hello-operator.v0.0.2
 
+**** Ornek ****
 
+git clone https://github.com/alpaslank-73/hello-operator.git
+
+cd hello-operator
+
+oc create namespace hello-operator
+oc apply -f catalogsource.yaml
+oc apply -f operatorgroup.yaml
+oc apply -f subscription.yaml
+
+oc new-project operator-deneme
+
+Bu ornekte (metadata bolumunde) namespace belirtilmedigi icin 'hello' resource'u current namespace'de yaratiliyor ancak hello-xxx pod'u hedef-namespace'de yaratiliyor. Hatta bu namespace yoksa da yaratiliyor ve namespace silinse bile operator tekrar yaratiyor (operatorun yetkisi var).
+
+$ cat sample.yaml
+apiVersion: mygroup.quay.io/v1
+kind: Hello
+metadata:
+  labels:
+    app.kubernetes.io/name: hello
+    app.kubernetes.io/instance: hello-sample
+    app.kubernetes.io/part-of: hello-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: hello-operator
+  name: hello-sample
+spec:
+  namespace: hedef-namespace
+
+$ oc create -f sample.yaml
+
+$ oc get hello
+hello-sample
+
+$ oc get pod,route -n hedef-namespace
+pod/hello-798744b486-8w2mp ...
+... hello-hedef-namespace.apps.ocp4.example.com 
+
+$ oc delete hello hello-sample
+
+$ oc delete project operator-deneme

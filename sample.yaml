@@ -9,4 +9,4 @@ metadata:
     app.kubernetes.io/created-by: hello-operator
   name: hello-sample
 spec:
-  namespace: zalp1
+  namespace: hedef-namespace
