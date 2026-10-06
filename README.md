@@ -169,7 +169,6 @@ $ vim bundle/manifests/hello-operator-manager-role_rbac.authorization.k8s.io_v1_
 $ make bundle   ==> Bundle ile ilgili dizini yaratacak
 
 # Ayrica asagidaki dosyayi da su sekilde duzelt: 
-# 6 Ekim 2026 - Bu step şart değil
 
 $ vim ./bundle/manifests/hello-operator.clusterserviceversion.yaml
 
@@ -202,16 +201,16 @@ $ operator-sdk run bundle quay.io/alpaslank/hello-operator-bundle:v0.0.x ( versi
 $ make catalog-build catalog-push (Bu komut hata verirse aşağıdakini dene)
 
 Yukarıdaki yemezse (muhtemelen yemez): 
-$ make catalog-build catalog-push   CONTAINER_TOOL=podman   CATALOG_IMG=quay.io/alpaslank/hello-operator-catalog:v0.0.4   BUNDLE_IMGS=quay.io/alpaslank/hello-operator-bundle:v0.0.4
+$ make catalog-build catalog-push   CONTAINER_TOOL=podman   CATALOG_IMG=quay.io/alpaslank/hello-operator-catalog:v0.0.7   BUNDLE_IMGS=quay.io/alpaslank/hello-operator-bundle:v0.0.7
 
 
 # Otomatik update istiyorsak (dikkat; 
 
-$ skopeo copy docker://quay.io/alpaslank/hello-operator:0.0.6 docker://quay.io/alpaslank/hello-operator:latest (bu adim sart degil ama paralellik acisindan yapmak iyi olur)
+$ skopeo copy docker://quay.io/alpaslank/hello-operator:0.0.7 docker://quay.io/alpaslank/hello-operator:latest (bu adim sart degil ama paralellik acisindan yapmak iyi olur)
 
-$ skopeo copy docker://quay.io/alpaslank/hello-operator-bundle:v0.0.6 docker://quay.io/alpaslank/hello-operator-bundle:latest
+$ skopeo copy docker://quay.io/alpaslank/hello-operator-bundle:v0.0.7 docker://quay.io/alpaslank/hello-operator-bundle:latest
 
-$ skopeo copy docker://quay.io/alpaslank/hello-operator-catalog:v0.0.6 docker://quay.io/alpaslank/hello-operator-catalog:latest
+$ skopeo copy docker://quay.io/alpaslank/hello-operator-catalog:v0.0.7 docker://quay.io/alpaslank/hello-operator-catalog:latest
 
 $ oc edit 
 ...
