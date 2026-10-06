@@ -1,0 +1,194 @@
+{
+    "schema": "olm.bundle",
+    "name": "hello-operator.v0.0.5",
+    "package": "hello-operator",
+    "image": "quay.io/alpaslank/hello-operator-bundle:v0.0.5",
+    "properties": [
+        {
+            "type": "olm.gvk",
+            "value": {
+                "group": "apigroup.perception.com.tr",
+                "kind": "Hello",
+                "version": "v1"
+            }
+        },
+        {
+            "type": "olm.package",
+            "value": {
+                "packageName": "hello-operator",
+                "version": "0.0.5"
+            }
+        },
+        {
+            "type": "olm.csv.metadata",
+            "value": {
+                "annotations": {
+                    "alm-examples": "[\n  {\n    \"apiVersion\": \"apigroup.perception.com.tr/v1\",\n    \"kind\": \"Hello\",\n    \"metadata\": {\n      \"labels\": {\n        \"app.kubernetes.io/managed-by\": \"kustomize\",\n        \"app.kubernetes.io/name\": \"hello-operator\"\n      },\n      \"name\": \"hello-sample\"\n    },\n    \"spec\": null\n  }\n]",
+                    "capabilities": "Basic Install",
+                    "createdAt": "2026-10-06T18:16:46Z",
+                    "operators.operatorframework.io/builder": "operator-sdk-v1.42.3",
+                    "operators.operatorframework.io/project_layout": "ansible.sdk.operatorframework.io/v1"
+                },
+                "apiServiceDefinitions": {},
+                "crdDescriptions": {
+                    "owned": [
+                        {
+                            "name": "hellos.apigroup.perception.com.tr",
+                            "version": "v1",
+                            "kind": "Hello"
+                        }
+                    ]
+                },
+                "description": "Sample Operator",
+                "displayName": "Hello Operator",
+                "installModes": [
+                    {
+                        "type": "OwnNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "SingleNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "MultiNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "AllNamespaces",
+                        "supported": true
+                    }
+                ],
+                "keywords": [
+                    "hello-operator",
+                    "operator",
+                    "ansible"
+                ],
+                "links": [
+                    {
+                        "name": "Hello Operator",
+                        "url": "https://hello-operator.domain"
+                    }
+                ],
+                "maintainers": [
+                    {
+                        "name": "alp",
+                        "email": "alp@perception.com.tr"
+                    }
+                ],
+                "maturity": "alpha",
+                "provider": {
+                    "name": "Alpaslan Kaplan",
+                    "url": "https://perception.com.tr"
+                }
+            }
+        }
+    ],
+    "relatedImages": [
+        {
+            "name": "",
+            "image": "quay.io/alpaslank/hello-operator-bundle:v0.0.5"
+        },
+        {
+            "name": "",
+            "image": "quay.io/alpaslank/hello-operator:0.0.5"
+        }
+    ]
+}
+{
+    "schema": "olm.bundle",
+    "name": "hello-operator.v0.0.6",
+    "package": "hello-operator",
+    "image": "quay.io/alpaslank/hello-operator-bundle:v0.0.6",
+    "properties": [
+        {
+            "type": "olm.gvk",
+            "value": {
+                "group": "apigroup.perception.com.tr",
+                "kind": "Hello",
+                "version": "v1"
+            }
+        },
+        {
+            "type": "olm.package",
+            "value": {
+                "packageName": "hello-operator",
+                "version": "0.0.6"
+            }
+        },
+        {
+            "type": "olm.csv.metadata",
+            "value": {
+                "annotations": {
+                    "alm-examples": "[\n  {\n    \"apiVersion\": \"apigroup.perception.com.tr/v1\",\n    \"kind\": \"Hello\",\n    \"metadata\": {\n      \"labels\": {\n        \"app.kubernetes.io/managed-by\": \"kustomize\",\n        \"app.kubernetes.io/name\": \"hello-operator\"\n      },\n      \"name\": \"hello-sample\"\n    },\n    \"spec\": null\n  }\n]",
+                    "capabilities": "Basic Install",
+                    "createdAt": "2026-10-06T19:21:36Z",
+                    "operators.operatorframework.io/builder": "operator-sdk-v1.42.3",
+                    "operators.operatorframework.io/project_layout": "ansible.sdk.operatorframework.io/v1"
+                },
+                "apiServiceDefinitions": {},
+                "crdDescriptions": {
+                    "owned": [
+                        {
+                            "name": "hellos.apigroup.perception.com.tr",
+                            "version": "v1",
+                            "kind": "Hello"
+                        }
+                    ]
+                },
+                "description": "Sample Operator",
+                "displayName": "Hello Operator",
+                "installModes": [
+                    {
+                        "type": "OwnNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "SingleNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "MultiNamespace",
+                        "supported": false
+                    },
+                    {
+                        "type": "AllNamespaces",
+                        "supported": true
+                    }
+                ],
+                "keywords": [
+                    "hello-operator",
+                    "operator",
+                    "ansible"
+                ],
+                "links": [
+                    {
+                        "name": "Hello Operator",
+                        "url": "https://hello-operator.domain"
+                    }
+                ],
+                "maintainers": [
+                    {
+                        "name": "alp",
+                        "email": "alp@perception.com.tr"
+                    }
+                ],
+                "maturity": "alpha",
+                "provider": {
+                    "name": "Alpaslan Kaplan",
+                    "url": "https://perception.com.tr"
+                }
+            }
+        }
+    ],
+    "relatedImages": [
+        {
+            "name": "",
+            "image": "quay.io/alpaslank/hello-operator-bundle:v0.0.6"
+        },
+        {
+            "name": "",
+            "image": "quay.io/alpaslank/hello-operator:0.0.6"
+        }
+    ]
+}

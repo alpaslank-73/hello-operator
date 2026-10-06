@@ -1,0 +1,313 @@
+Hello Operator:
+
+Bu ornek "cluster-wide scope" bir operator ornegi. Namespace scoped olan operatorler ise tek bir namespace'e kurulup oradaki resource'lari yonetiyor. Benim ornek baska namespace yaratabiliyor.
+
+#### Install operator-sdk
+
+$ export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+
+$ export OS=$(uname | awk '{print tolower($0)}')
+
+$ export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.42.3
+
+$ curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+
+$ chmod +x operator-sdk_linux_amd64
+
+$ sudo ln operator-sdk_linux_amd64 /usr/local/bin/operator-sdk
+
+#### Install ansible-runner: 
+
+Bu RPM sadece operatoru local olarak (test amacli) calistiracaksan gerekli. 
+
+$ subscription-manager repos enable ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
+
+$ sudo yum install -y ansible-runner
+
+#### Kustomize aslinda sart degil ancak kurmak istersen:
+
+$ curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash    # sonra "sudo ln kuztomize /usr/local/bin/"
+
+-------------------
+# Create operator #
+-------------------
+Bu operator Ansible role ile quay.io/alpaslank/hello:latest imajini kullanarak bir deployment yapiyor.
+
+$ mkdir hello-operator ; cd hello-operator
+
+$ operator-sdk init --domain perception.com.tr --plugins ansible  
+
+$ operator-sdk create api --group apigroup --version v1 --kind Hello --generate-role 
+
+rolu'u update et: (Role ve operator dosyalari github'da mevcut)
+
+$ cat roles/hello/tasks/main.yml
+...
+$ vim roles/hello/meta/main.yml
+...
+$ cat roles/hello/vars/main.yml
+...
+
+#### Gerekli toolar yok ise:
+
+$ pip install ansible-runner
+$ ansible-galaxy collection install community.okd kubernetes.core
+$ pip install kubernetes openshift
+
+#### Lokal olarak run etmek icin ansible-runner gerekiyor:
+
+$ oc login -u admin -p redhat 
+$ oc new-project test    
+
+$ make install (bu adim custom resource'u (customresourcedefinition.apiextensions.k8s.io/hellos.mygroup.quay.io) yaratiyor)
+
+$ make run   
+
+#### "make run" calisiyorken test icin asagidaki gibi bir "hello" resource yarat:
+
+*** Dikkat asagidaki islem ilk denemelerinde hata verebilir; CR'un tanimlanmasi zaman alabiliyor)
+
+$ oc create -f config/samples/apigroup_v1_hello.yaml . # "hello-sample" isimli "hello" resource'u farkli namespace'te, "hello" deployment'i vs farkli namespace'te oluyor (mynamespace default ancak override edilebilir)
+
+$ oc get hello -n NAMESPACE ; oc get deploy,svc,route -n DEST_NAMESPACE
+
+Istersen scale etmeyi de goster:
+
+$ oc edit hello -n test ==> replicas: 2
+
+Silmek icin:
+
+$ oc delete -n hello myhello 
+$ oc delete project mynamespace
+
+*** Local operatoru durdur ==> CTRL+C (yukarida baslatmistin)
+
+#### Operatoru cluster uzerine kurmak icin (OLM'den bagimsiz olarak):
+
+Cluster uzerine deploy edebilmek icin operator imajina ihtiyacimiz var var 
+
+Bunun icin Makefile'i duzelt (duzeltilen 2 satirin biri operator imaji digeri bundle imaji ile ilgili):
+
+$ vim Makefile
+...
+IMAGE_TAG_BASE ?= quay.io/hello-operator  ==> IMAGE_TAG_BASE ?= quay.io/alpaslank/hello-operator
+...
+IMG ?= controller:latest ==> IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
+
+#### community.okd modullerini kullanabilmek icin:
+
+$ cat requirements.yaml   
+collections:
+  - name: operator_sdk.util
+  - name: kubernetes.core
+  - name: cloud.common
+  - name: community.docker
+  - name: community.okd
+
+#### Default olarak "controller-manager" serviceaccount'u "manager-role" cluster-role'une sahip ve bu rolde proje yaratma yetkisi yok. Bunu duzeltmek icin (biraz abartip cluster-admin yetkisi tanimladin):
+
+$ vim config/rbac/role.yaml
+...
+# Full yetki - Alpaslan
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+
+
+*** Asagidaki islem onesinde quay.io'da "hello-operator" reposunu yarat ve "public" yap! (hatta "hello-operator-bundle"i da yarat ve public yap)
+
+$ podman login quay.io 
+
+$ sudo yum install -y docker
+
+$ make docker-build docker-push
+
+$ make deploy ==> hello-operator-system isminde bir namespace'e kuruyor (serviceaccount, service, deployment, role vs de yaratiyor)
+
+#### Eger birseyler duzelteceksen Makefile'daki 
+...
+"VERSION ?= 0.0.3"  ==> satirini update et ve:
+
+$ make docker-build docker-push
+
+$ make undeploy ==> Bu adima gerek yok aslinda; 
+
+$ make deploy IMG=quay.io/alpaslank/hello-operator:0.0.3
+
+$ oc create -f config/samples/mygroup_v1_hello.yaml
+
+#### Deploy your Operator with OLM
+
+*** Bu islem oncesinde de "hello-operator-bundle" reposunu quay.io'da yarat ve public yap!
+
+$ operator-sdk olm install ==> Bu adim "zaten kurulu" diyerek hata veriyor (DO380 setup'inda)
+
+## Yetki konusunda sorun olmamasi icin rolu update et (aslinda en basta yaptiysan buna gerek olmamasi lazim)
+
+$ vim bundle/manifests/hello-operator-manager-role_rbac.authorization.k8s.io_v1_clusterrole.yaml
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+
+# Bundle yarat
+# config/ Dizinini Derler + bundle/ Klasörünü Oluşturur/Günceller + CSV İçeriğini Günceller (config/manifests/bases/ altındaki)
+
+$ make bundle   ==> Bundle ile ilgili dizini yaratacak
+
+# Ayrica asagidaki dosyayi da su sekilde duzelt: 
+# 6 Ekim 2026 - Bu step şart değil
+
+$ vim ./bundle/manifests/hello-operator.clusterserviceversion.yaml
+
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: true                  # Buna gerek olmayabilir
+    type: MultiNamespace
+  - supported: true                  # Buna gerek olmayabilir
+    type: AllNamespaces
+
+# Bu step önemli!
+
+$ vim Makefile ==> increase version
+
+$ CONTAINER_TOOL=podman make docker-build docker-push bundle-build bundle-push
+
+(gerekirse "make bundle-build BUNDLE_IMG=quay.io/alpaslank/hello-operator-bundle..." da mumkun)
+
+$ oc project openshift-marketplace  # Bu adim onemli yoksa operator install ekraninda namespace secemiyorsun
+
+$ operator-sdk run bundle quay.io/alpaslank/hello-operator-bundle:v0.0.x ( versiyon ne ise)
+
+#### Catalog yaratma
+
+*** Bu islem oncesinde "hello-operator-catalog" reposunu quay.io'da yarat ve public yap!
+
+$ make catalog-build catalog-push (Bu komut hata verirse aşağıdakini dene)
+
+Yukarıdaki yemezse (muhtemelen yemez): 
+$ make catalog-build catalog-push   CONTAINER_TOOL=podman   CATALOG_IMG=quay.io/alpaslank/hello-operator-catalog:v0.0.4   BUNDLE_IMGS=quay.io/alpaslank/hello-operator-bundle:v0.0.4
+
+
+# Otomatik update istiyorsak (dikkat; 
+
+$ skopeo copy docker://quay.io/alpaslank/hello-operator:0.0.6 docker://quay.io/alpaslank/hello-operator:latest (bu adim sart degil ama paralellik acisindan yapmak iyi olur)
+
+$ skopeo copy docker://quay.io/alpaslank/hello-operator-bundle:v0.0.6 docker://quay.io/alpaslank/hello-operator-bundle:latest
+
+$ skopeo copy docker://quay.io/alpaslank/hello-operator-catalog:v0.0.6 docker://quay.io/alpaslank/hello-operator-catalog:latest
+
+$ oc edit 
+...
+spec:
+  image: quay.io/alpaslank/hello-operator-catalog:latest
+...
+=======================================
+Operator Hub'ı pass gecerek quay.io'daki repo'lar uzerinden direkt operator kurmak icin sirasiyla "namespace, catalogsource, operatorgroup ve subscription" yarat (silmek icin de "sub, csv & og" u sil):
+
+1) oc create namespace hello-operator
+
+2) oc apply -f catalogsource.yaml
+
+3) oc apply -f operatorgroup.yaml
+
+4) oc apply -f subscription.yaml
+
+Dosyalar:
+
+$ cat catalogsource.yaml 
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: hello-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: Hello catalog
+  icon:
+    base64data: ""
+    mediatype: ""
+  image: quay.io/alpaslank/hello-operator-catalog:latest
+  publisher: Perception
+  sourceType: grpc
+----------------------------------
+$ cat operatorgroup.yaml 
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: hello-operator
+  namespace: hello-operator
+spec:
+  targetNamespaces:
+  - hello-operator
+----------------------------------
+$ cat subscription.yaml 
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: hello-operator
+  namespace: hello-operator
+spec:
+  channel: alpha
+  name: hello-operator
+  source: hello-operator-catalog
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic
+  #startingCSV: hello-operator.v0.0.2
+
+**** Ornek ****
+
+git clone https://github.com/alpaslank-73/hello-operator.git
+
+cd hello-operator
+
+oc create namespace hello-operator
+oc apply -f catalogsource.yaml
+oc apply -f operatorgroup.yaml
+oc apply -f subscription.yaml
+
+oc new-project operator-deneme
+
+Bu ornekte (metadata bolumunde) namespace belirtilmedigi icin 'hello' resource'u current namespace'de yaratiliyor ancak hello-xxx pod'u hedef-namespace'de yaratiliyor. Hatta bu namespace yoksa da yaratiliyor ve namespace silinse bile operator tekrar yaratiyor (operatorun yetkisi var).
+
+$ cat sample.yaml
+apiVersion: mygroup.quay.io/v1
+kind: Hello
+metadata:
+  labels:
+    app.kubernetes.io/name: hello
+    app.kubernetes.io/instance: hello-sample
+    app.kubernetes.io/part-of: hello-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: hello-operator
+  name: hello-sample
+spec:
+  namespace: hedef-namespace
+
+$ oc create -f sample.yaml
+
+$ oc get hello
+hello-sample
+
+$ oc get pod,route -n hedef-namespace
+pod/hello-798744b486-8w2mp ...
+... hello-hedef-namespace.apps.ocp4.example.com 
+
+$ oc delete hello hello-sample
+
+$ oc delete project operator-deneme

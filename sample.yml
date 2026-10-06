@@ -1,0 +1,13 @@
+apiVersion: alpapigroup.perception.com.tr/v1
+kind: Hello
+metadata:
+  labels:
+    app.kubernetes.io/name: yeni-hello-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: hello-sample
+spec:
+  # TODO(user): Add fields here
+  # namespace: mynamespace
+  # image: quay.io/alpaslank/hello:latest
+  # name: hello
+  # replicas: 1

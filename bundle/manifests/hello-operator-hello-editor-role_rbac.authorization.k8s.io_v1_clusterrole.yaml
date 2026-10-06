@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: hello-operator
+  name: hello-operator-hello-editor-role
+rules:
+- apiGroups:
+  - apigroup.perception.com.tr
+  resources:
+  - hellos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apigroup.perception.com.tr
+  resources:
+  - hellos/status
+  verbs:
+  - get
